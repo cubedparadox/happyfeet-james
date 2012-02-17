@@ -3,6 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="StatusWindow" Height="500" Width="800" Loaded="WindowLoaded">
     <Grid>
-        <TextBox Height="437" HorizontalAlignment="Left" Margin="12,12,0,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="754" IsReadOnly="True" />
+        <TextBox Height="437" HorizontalAlignment="Left" Margin="12,12,0,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="747" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectStatusBox_TextChanged" />
     </Grid>
 </Window>

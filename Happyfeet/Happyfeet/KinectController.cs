@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
@@ -8,12 +9,18 @@ namespace Happyfeet
 {
     class KinectController
     {
+        private Dictionary<string, KinectSensor> kinectSensors;
+        private Skeleton[] skeletonData;
+
         #region Event definitions
         public event KinectInitializingHandler Initializing;
         public event KinectNotPoweredHandler NotPowered;
         public event KinectReadyHandler Ready;
         public event KinectDisconnectedHandler Disconnected;
         public event KinectErrorHandler Error;
+        public event KinectStreamEnabled StreamEnabled;
+        public event KinectStreamDisabled StreamDisabled;
+        public event KinectSkeletonTracked SkeletonTracked;
         #endregion
 
         #region Event invokers
@@ -46,7 +53,30 @@ namespace Happyfeet
             if (Error != null)
                 Error(this, e);
         }
+
+        protected virtual void OnStreamEnabled(KinectStatusArgs e)
+        {
+            if (StreamEnabled != null)
+                StreamEnabled(this, e);
+        }
+
+        protected virtual void OnStreamDisabled(KinectStatusArgs e)
+        {
+            if (StreamDisabled != null)
+                StreamDisabled(this, e);
+        }
+
+        protected virtual void OnSkeletonTracked(KinectSkeletonTrackedArgs e)
+        {
+            if (SkeletonTracked != null)
+                SkeletonTracked(this, e);
+        }
         #endregion
+
+        public KinectController()
+        {
+            this.kinectSensors = new Dictionary<string, KinectSensor>();
+        }
 
         ~KinectController()
         {
@@ -60,6 +90,7 @@ namespace Happyfeet
             foreach (KinectSensor sensor in KinectSensor.KinectSensors)
             {
                 UpdateListeners(sensor);
+                HandleStream(sensor);
             }
         }
 
@@ -72,10 +103,37 @@ namespace Happyfeet
         {
             KinectSensor sensor = e.Sensor;
             UpdateListeners(sensor);
+            HandleStream(sensor);
+        }
+
+        private void SkeletonReady(object sender, SkeletonFrameReadyEventArgs e)
+        {
+            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
+            {
+                if (skeletonFrame != null)
+                {
+                    if ((this.skeletonData == null) || (this.skeletonData.Length != skeletonFrame.SkeletonArrayLength))
+                    {
+                        this.skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                    }
+
+                    skeletonFrame.CopySkeletonDataTo(this.skeletonData);
+
+                    foreach (Skeleton skeleton in this.skeletonData)
+                    {
+                        if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+                            OnSkeletonTracked(new KinectSkeletonTrackedArgs(skeleton));
+                        }
+                    }
+                }
+            }
         }
 
         private void UpdateListeners(KinectSensor sensor)
         {
+            if (!kinectSensors.ContainsValue(sensor))
+                kinectSensors.Add(sensor.DeviceConnectionId, sensor);
             switch (sensor.Status)
             {
                 case KinectStatus.Initializing:
@@ -95,6 +153,36 @@ namespace Happyfeet
                     break;
             }
         }
+
+        private void HandleStream(KinectSensor sensor)
+        {
+            if (sensor.Status == KinectStatus.Connected)
+            {
+                sensor.SkeletonFrameReady += this.SkeletonReady;
+                sensor.SkeletonStream.Enable(new TransformSmoothParameters()
+                                            {
+                                                Smoothing = 0.5f,
+                                                Correction = 0.5f,
+                                                Prediction = 0.5f,
+                                                JitterRadius = 0.05f,
+                                                MaxDeviationRadius = 0.04f
+                                            });
+                try
+                {
+                    sensor.Start();
+                }
+                catch (IOException)
+                {
+
+                }
+                OnStreamEnabled(new KinectStatusArgs(sensor.DeviceConnectionId));
+            }
+            else
+            {
+                OnStreamDisabled(new KinectStatusArgs(sensor.DeviceConnectionId));
+                sensor.Stop();
+            }
+        }
     }
 
     #region Delegate definitions
@@ -103,6 +191,9 @@ namespace Happyfeet
     public delegate void KinectReadyHandler(object sender, KinectStatusArgs e);
     public delegate void KinectDisconnectedHandler(object sender, KinectStatusArgs e);
     public delegate void KinectErrorHandler(object sender, KinectErrorArgs e);
+    public delegate void KinectStreamEnabled(object sender, KinectStatusArgs e);
+    public delegate void KinectStreamDisabled(object sender, KinectStatusArgs e);
+    public delegate void KinectSkeletonTracked(object sender, KinectSkeletonTrackedArgs e);
     #endregion
 
     #region Event argument definitions
@@ -126,6 +217,16 @@ namespace Happyfeet
 
         public string kinectID;
         public KinectStatus status;
+    }
+
+    public class KinectSkeletonTrackedArgs : EventArgs
+    {
+        public KinectSkeletonTrackedArgs(Skeleton skeleton)
+        {
+            this.skeleton = skeleton;
+        }
+
+        public Skeleton skeleton;
     }
     #endregion
 }

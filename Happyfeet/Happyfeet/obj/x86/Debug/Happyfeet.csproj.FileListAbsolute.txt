@@ -15,3 +15,16 @@ C:\Users\James\documents\visual studio 2010\Projects\Happyfeet\Happyfeet\obj\x86
 C:\Users\James\documents\visual studio 2010\Projects\Happyfeet\Happyfeet\obj\x86\Debug\StatusWindow.g.cs
 C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\Happyfeet.exe
 C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\Happyfeet.pdb
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\bin\Debug\Happyfeet.exe
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\bin\Debug\Happyfeet.pdb
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\MainWindow.baml
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\StatusWindow.baml
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\MainWindow.g.cs
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\StatusWindow.g.cs
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\App.g.cs
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\Happyfeet_MarkupCompile.cache
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\Happyfeet.g.resources
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\Happyfeet.Properties.Resources.resources
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\James\Documents\happyfeet\Happyfeet\Happyfeet\obj\x86\Debug\GenerateResource.write.1.tlog

@@ -34,6 +34,9 @@ namespace Happyfeet
             kinectController.Error += this.KinectError;
             kinectController.Ready += this.KinectReady;
             kinectController.Disconnected += this.KinectDisconnected;
+            kinectController.StreamEnabled += this.KinectStreamEnabled;
+            kinectController.StreamDisabled += this.KinectStreamDisabled;
+            kinectController.SkeletonTracked += this.KinectSkeletonTracked;
 
             kinectController.KinectStart();
         }
@@ -61,6 +64,26 @@ namespace Happyfeet
         private void KinectDisconnected(object sender, KinectStatusArgs e)
         {
             this.kinectStatusBox.Text += "Kinect " + e.kinectID + " has been disconnected...\n";
+        }
+
+        private void KinectStreamEnabled(object sender, KinectStatusArgs e)
+        {
+            this.kinectStatusBox.Text += "Kinect " + e.kinectID + ": Stream enabled...\n";
+        }
+
+        private void KinectStreamDisabled(object sender, KinectStatusArgs e)
+        {
+            this.kinectStatusBox.Text += "Kinect " + e.kinectID + ": Stream disabled...\n";
+        }
+
+        private void KinectSkeletonTracked(object sender, KinectSkeletonTrackedArgs e)
+        {
+            this.kinectStatusBox.Text += "Skeleton " + e.skeleton.TrackingId + ": (" + e.skeleton.Position.X + "," + e.skeleton.Position.Y + "," + e.skeleton.Position.Z + ")\n";
+        }
+
+        private void kinectStatusBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            kinectStatusBox.ScrollToEnd();
         }
     }
 }
