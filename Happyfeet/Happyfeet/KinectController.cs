@@ -21,6 +21,10 @@ namespace Happyfeet
         public event KinectStreamEnabled StreamEnabled;
         public event KinectStreamDisabled StreamDisabled;
         public event KinectSkeletonTracked SkeletonTracked;
+        public event KinectLeftFootTracked LeftFootTracked;
+        public event KinectRightFootTracked RightFootTracked;
+        public event KinectLeftAnkleTracked LeftAnkleTracked;
+        public event KinectRightAnkleTracked RightAnkleTracked;
         #endregion
 
         #region Event invokers
@@ -70,6 +74,30 @@ namespace Happyfeet
         {
             if (SkeletonTracked != null)
                 SkeletonTracked(this, e);
+        }
+
+        protected virtual void OnLeftFootTracked(KinectJointTrackedArgs e)
+        {
+            if (LeftFootTracked != null)
+                LeftFootTracked(this, e);
+        }
+
+        protected virtual void OnRightFootTracked(KinectJointTrackedArgs e)
+        {
+            if (RightFootTracked != null)
+                RightFootTracked(this, e);
+        }
+
+        protected virtual void OnLeftAnkleTracked(KinectJointTrackedArgs e)
+        {
+            if (LeftAnkleTracked != null)
+                LeftAnkleTracked(this, e);
+        }
+
+        protected virtual void OnRightAnkleTracked(KinectJointTrackedArgs e)
+        {
+            if (RightAnkleTracked != null)
+                RightAnkleTracked(this, e);
         }
         #endregion
 
@@ -194,6 +222,10 @@ namespace Happyfeet
     public delegate void KinectStreamEnabled(object sender, KinectStatusArgs e);
     public delegate void KinectStreamDisabled(object sender, KinectStatusArgs e);
     public delegate void KinectSkeletonTracked(object sender, KinectSkeletonTrackedArgs e);
+    public delegate void KinectLeftFootTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectRightFootTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectLeftAnkleTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectRightAnkleTracked(object sender, KinectJointTrackedArgs e);
     #endregion
 
     #region Event argument definitions
@@ -227,6 +259,20 @@ namespace Happyfeet
         }
 
         public Skeleton skeleton;
+    }
+
+    public class KinectJointTrackedArgs : EventArgs
+    {
+        public KinectJointTrackedArgs(JointType type, SkeletonPoint position, long timestamp)
+        {
+            this.type = type;
+            this.position = position;
+            this.timestamp = timestamp;
+        }
+
+        public JointType type;
+        public SkeletonPoint position;
+        public long timestamp;
     }
     #endregion
 }
