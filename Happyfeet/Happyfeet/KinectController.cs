@@ -11,6 +11,7 @@ namespace Happyfeet
     {
         private Dictionary<string, KinectSensor> kinectSensors;
         private Skeleton[] skeletonData;
+        private List<int> trackedSkeletons;
 
         #region Event definitions
         public event KinectInitializingHandler Initializing;
@@ -25,6 +26,8 @@ namespace Happyfeet
         public event KinectRightFootTracked RightFootTracked;
         public event KinectLeftAnkleTracked LeftAnkleTracked;
         public event KinectRightAnkleTracked RightAnkleTracked;
+        public event KinectLeftKneeTracked LeftKneeTracked;
+        public event KinectRightKneeTracked RightKneeTracked;
         #endregion
 
         #region Event invokers
@@ -99,11 +102,24 @@ namespace Happyfeet
             if (RightAnkleTracked != null)
                 RightAnkleTracked(this, e);
         }
+
+        protected virtual void OnLeftKneeTracked(KinectJointTrackedArgs e)
+        {
+            if (LeftKneeTracked != null)
+                LeftKneeTracked(this, e);
+        }
+
+        protected virtual void OnRightKneeTracked(KinectJointTrackedArgs e)
+        {
+            if (RightKneeTracked != null)
+                RightKneeTracked(this, e);
+        }
         #endregion
 
         public KinectController()
         {
             this.kinectSensors = new Dictionary<string, KinectSensor>();
+            this.trackedSkeletons = new List<int>();
         }
 
         ~KinectController()
@@ -147,12 +163,56 @@ namespace Happyfeet
 
                     skeletonFrame.CopySkeletonDataTo(this.skeletonData);
 
+                    bool found = false;
+
                     foreach (Skeleton skeleton in this.skeletonData)
                     {
                         if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                         {
+                            if (!this.trackedSkeletons.Contains(skeleton.TrackingId))
+                            {
+                                this.trackedSkeletons.Add(skeleton.TrackingId);
+                            }
+
                             OnSkeletonTracked(new KinectSkeletonTrackedArgs(skeleton));
+
+                            if (this.trackedSkeletons.Count > 0 && skeleton.TrackingId == this.trackedSkeletons.First())
+                            {
+                                found = true;
+                                foreach (Joint joint in skeleton.Joints)
+                                {
+                                    if (joint.TrackingState == JointTrackingState.Tracked)
+                                    {
+                                        switch (joint.JointType)
+                                        {
+                                            case (JointType.FootLeft):
+                                                OnLeftFootTracked(new KinectJointTrackedArgs(JointType.FootLeft, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                            case (JointType.FootRight):
+                                                OnRightFootTracked(new KinectJointTrackedArgs(JointType.FootRight, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                            case (JointType.AnkleLeft):
+                                                OnLeftAnkleTracked(new KinectJointTrackedArgs(JointType.AnkleLeft, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                            case (JointType.AnkleRight):
+                                                OnRightAnkleTracked(new KinectJointTrackedArgs(JointType.AnkleRight, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                            case (JointType.KneeLeft):
+                                                OnLeftKneeTracked(new KinectJointTrackedArgs(JointType.KneeLeft, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                            case (JointType.KneeRight):
+                                                OnRightKneeTracked(new KinectJointTrackedArgs(JointType.KneeRight, joint.Position, skeletonFrame.Timestamp));
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
                         }
+                    }
+
+                    if (!found && this.trackedSkeletons.Count > 0)
+                    {
+                        this.trackedSkeletons.RemoveAt(0);
                     }
                 }
             }
@@ -226,6 +286,8 @@ namespace Happyfeet
     public delegate void KinectRightFootTracked(object sender, KinectJointTrackedArgs e);
     public delegate void KinectLeftAnkleTracked(object sender, KinectJointTrackedArgs e);
     public delegate void KinectRightAnkleTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectLeftKneeTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectRightKneeTracked(object sender, KinectJointTrackedArgs e);
     #endregion
 
     #region Event argument definitions
