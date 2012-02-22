@@ -28,6 +28,7 @@ namespace Happyfeet
         public event KinectRightAnkleTracked RightAnkleTracked;
         public event KinectLeftKneeTracked LeftKneeTracked;
         public event KinectRightKneeTracked RightKneeTracked;
+        public event KinectSpineTracked SpineTracked;
         #endregion
 
         #region Event invokers
@@ -113,6 +114,12 @@ namespace Happyfeet
         {
             if (RightKneeTracked != null)
                 RightKneeTracked(this, e);
+        }
+
+        protected virtual void OnSpineTracked(KinectJointTrackedArgs e)
+        {
+            if (SpineTracked != null)
+                SpineTracked(this, e);
         }
         #endregion
 
@@ -203,6 +210,9 @@ namespace Happyfeet
                                             case (JointType.KneeRight):
                                                 OnRightKneeTracked(new KinectJointTrackedArgs(JointType.KneeRight, joint.Position, skeletonFrame.Timestamp));
                                                 break;
+                                            case (JointType.Spine):
+                                                OnSpineTracked(new KinectJointTrackedArgs(JointType.Spine, joint.Position, skeletonFrame.Timestamp));
+                                                break;
                                         }
                                     }
                                 }
@@ -288,6 +298,7 @@ namespace Happyfeet
     public delegate void KinectRightAnkleTracked(object sender, KinectJointTrackedArgs e);
     public delegate void KinectLeftKneeTracked(object sender, KinectJointTrackedArgs e);
     public delegate void KinectRightKneeTracked(object sender, KinectJointTrackedArgs e);
+    public delegate void KinectSpineTracked(object sender, KinectJointTrackedArgs e);
     #endregion
 
     #region Event argument definitions

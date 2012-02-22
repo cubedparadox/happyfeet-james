@@ -43,6 +43,7 @@ namespace Happyfeet
             kinectController.RightAnkleTracked += this.KinectRightAnkleTracked;
             kinectController.LeftKneeTracked += this.KinectLeftKneeTracked;
             kinectController.RightKneeTracked += this.KinectRightKneeTracked;
+            kinectController.SpineTracked += this.KinectSpineTracked;
 
             kinectController.KinectStart();
         }
@@ -115,6 +116,11 @@ namespace Happyfeet
         private void KinectRightKneeTracked(object sender, KinectJointTrackedArgs e)
         {
             this.kinectStatusBox.Text += "Right knee: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+        }
+
+        private void KinectSpineTracked(object sender, KinectJointTrackedArgs e)
+        {
+            this.kinectStatusBox.Text += "Spine: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
         }
 
         private void kinectStatusBox_TextChanged(object sender, TextChangedEventArgs e)
