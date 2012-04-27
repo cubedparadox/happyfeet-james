@@ -18,6 +18,7 @@
         <Label Content="Left Foot" HorizontalAlignment="Left" Margin="12,474,0,0" Name="label6" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" />
         <Label HorizontalAlignment="Left" Margin="12,519,0,0" Name="kinectLeftFootBox" VerticalAlignment="Top" FontSize="22" />
         <Label Content="Right Foot" HorizontalAlignment="Right" Margin="0,474,12,0" Name="label7" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" />
-        <Label HorizontalAlignment="Right" Margin="0,519,12,0" Name="kinectRightFootBox" VerticalAlignment="Top" FontSize="22" />
+        <Label Content="lol"  HorizontalAlignment="Right" Margin="0,519,12,0" Name="kinectRightFootBox" VerticalAlignment="Top" FontSize="22" />
+        <Label Content="Label" HorizontalAlignment="Center" Margin="0,564,0,0" Name="kinectStampLabel" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" Visibility="Hidden" />
     </Grid>
 </Window>

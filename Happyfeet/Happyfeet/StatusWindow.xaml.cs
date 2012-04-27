@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Happyfeet
 {
@@ -19,9 +20,12 @@ namespace Happyfeet
     /// </summary>
     public partial class StatusWindow : Window
     {
+        private const Int32 stampLabelTimeout = 3000;
+
         private KinectController kinectController;
         private KinectGestureRecognizer kinectGestureRecognizer;
         private List<int> reportedSkeletons;
+        private DispatcherTimer stampLabelTimer;
 
         public StatusWindow()
         {
@@ -31,6 +35,10 @@ namespace Happyfeet
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             reportedSkeletons = new List<int>();
+
+            stampLabelTimer = new DispatcherTimer();
+            stampLabelTimer.Interval = new TimeSpan(0, 0, 0, 0, stampLabelTimeout);
+            stampLabelTimer.Tick += ClearStampLabel;
 
             kinectController = new KinectController();
 
@@ -51,6 +59,8 @@ namespace Happyfeet
             kinectController.SpineTracked += this.KinectSpineTracked;
 
             kinectGestureRecognizer = new KinectGestureRecognizer(kinectController);
+
+            kinectGestureRecognizer.StampDetected += this.StampDetected;
 
             kinectController.KinectStart();
         }
@@ -134,6 +144,13 @@ namespace Happyfeet
             this.kinectSpineBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
+        private void StampDetected(object sender, KinectStampDetectedArgs e)
+        {
+            kinectStampLabel.Content = "Stamp detected at (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
+            kinectStampLabel.Visibility = System.Windows.Visibility.Visible;
+            stampLabelTimer.Start();
+        }
+
         private void kinectStatusBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             kinectStatusBox.ScrollToEnd();
@@ -142,6 +159,12 @@ namespace Happyfeet
         private void kinectSkeletonBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             kinectSkeletonBox.ScrollToEnd();
+        }
+
+        private void ClearStampLabel(object sender, EventArgs e)
+        {
+            kinectStampLabel.Visibility = System.Windows.Visibility.Hidden;
+            stampLabelTimer.Stop();
         }
     }
 }

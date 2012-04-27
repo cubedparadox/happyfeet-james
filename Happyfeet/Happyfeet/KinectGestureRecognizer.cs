@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Kinect;
 
 namespace Happyfeet
 {
@@ -19,6 +20,16 @@ namespace Happyfeet
         private Dictionary<long, KinectJointTrackedArgs> trackedRightAnkles;
         private Dictionary<long, KinectJointTrackedArgs> trackedRightFeet;
 
+        private Dictionary<long, KinectJointTrackedArgs> trackedSpines;
+
+        public event KinectStampDetectedHandler StampDetected;
+
+        protected virtual void OnStampDetected(KinectStampDetectedArgs e)
+        {
+            if (StampDetected != null)
+                StampDetected(this, e);
+        }
+
         public KinectGestureRecognizer(KinectController controller)
         {
             trackedLeftKnees = new Dictionary<long, KinectJointTrackedArgs>();
@@ -29,6 +40,8 @@ namespace Happyfeet
             trackedRightAnkles = new Dictionary<long, KinectJointTrackedArgs>();
             trackedRightFeet = new Dictionary<long, KinectJointTrackedArgs>();
 
+            trackedSpines = new Dictionary<long, KinectJointTrackedArgs>();
+
             controller.LeftKneeTracked += LeftKneeTracked;
             controller.LeftAnkleTracked += LeftAnkleTracked;
             controller.LeftFootTracked += LeftFootTracked;
@@ -36,6 +49,8 @@ namespace Happyfeet
             controller.RightKneeTracked += RightKneeTracked;
             controller.RightAnkleTracked += RightAnkleTracked;
             controller.RightFootTracked += RightFootTracked;
+
+            controller.SpineTracked += SpineTracked;
         }
 
         private void CheckForStamp(ref Dictionary<long, KinectJointTrackedArgs> trackedKnees, ref Dictionary<long, KinectJointTrackedArgs> trackedAnkles, ref Dictionary<long, KinectJointTrackedArgs> trackedFeet, long currentTimestamp)
@@ -43,6 +58,7 @@ namespace Happyfeet
             trackedKnees = RemoveOldTracks(trackedKnees, currentTimestamp);
             trackedAnkles = RemoveOldTracks(trackedAnkles, currentTimestamp);
             trackedFeet = RemoveOldTracks(trackedFeet, currentTimestamp);
+            trackedSpines = RemoveOldTracks(trackedSpines, currentTimestamp);
 
             try
             {
@@ -65,6 +81,9 @@ namespace Happyfeet
                 if (kneeCorrect && ankleCorrect && footCorrect)
                 {
                     // Stamp detected
+                    SkeletonPoint position = trackedSpines[trackedSpines.Keys.Max()].position;
+                    OnStampDetected(new KinectStampDetectedArgs(position, currentTimestamp));
+
                     trackedKnees.Clear();
                     trackedAnkles.Clear();
                     trackedFeet.Clear();
@@ -187,5 +206,24 @@ namespace Happyfeet
             trackedRightFeet.Add(e.timestamp, e);
             CheckForStamp(ref trackedRightKnees, ref trackedRightAnkles, ref trackedRightFeet, e.timestamp);
         }
+
+        private void SpineTracked(object sender, KinectJointTrackedArgs e)
+        {
+            trackedSpines.Add(e.timestamp, e);
+        }
+    }
+
+    public delegate void KinectStampDetectedHandler(object sender, KinectStampDetectedArgs e);
+
+    public class KinectStampDetectedArgs : EventArgs
+    {
+        public KinectStampDetectedArgs(SkeletonPoint position, long timestamp)
+        {
+            this.position = position;
+            this.timestamp = timestamp;
+        }
+        
+        public SkeletonPoint position;
+        public long timestamp;
     }
 }
