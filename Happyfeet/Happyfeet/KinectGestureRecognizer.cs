@@ -15,15 +15,27 @@ namespace Happyfeet
         private Dictionary<long, KinectJointTrackedArgs> trackedLeftAnkles;
         private Dictionary<long, KinectJointTrackedArgs> trackedLeftFeet;
 
+        private Dictionary<long, KinectJointTrackedArgs> trackedRightKnees;
+        private Dictionary<long, KinectJointTrackedArgs> trackedRightAnkles;
+        private Dictionary<long, KinectJointTrackedArgs> trackedRightFeet;
+
         public KinectGestureRecognizer(KinectController controller)
         {
             trackedLeftKnees = new Dictionary<long, KinectJointTrackedArgs>();
             trackedLeftAnkles = new Dictionary<long, KinectJointTrackedArgs>();
             trackedLeftFeet = new Dictionary<long, KinectJointTrackedArgs>();
 
+            trackedRightKnees = new Dictionary<long, KinectJointTrackedArgs>();
+            trackedRightAnkles = new Dictionary<long, KinectJointTrackedArgs>();
+            trackedRightFeet = new Dictionary<long, KinectJointTrackedArgs>();
+
             controller.LeftKneeTracked += LeftKneeTracked;
             controller.LeftAnkleTracked += LeftAnkleTracked;
             controller.LeftFootTracked += LeftFootTracked;
+
+            controller.RightKneeTracked += RightKneeTracked;
+            controller.RightAnkleTracked += RightAnkleTracked;
+            controller.RightFootTracked += RightFootTracked;
         }
 
         private void CheckForStamp(ref Dictionary<long, KinectJointTrackedArgs> trackedKnees, ref Dictionary<long, KinectJointTrackedArgs> trackedAnkles, ref Dictionary<long, KinectJointTrackedArgs> trackedFeet, long currentTimestamp)
@@ -158,6 +170,22 @@ namespace Happyfeet
         {
             trackedLeftFeet.Add(e.timestamp, e);
             CheckForStamp(ref trackedLeftKnees, ref trackedLeftAnkles, ref trackedLeftFeet, e.timestamp);
+        }
+
+        private void RightKneeTracked(object sender, KinectJointTrackedArgs e)
+        {
+            trackedRightKnees.Add(e.timestamp, e);
+        }
+
+        private void RightAnkleTracked(object sender, KinectJointTrackedArgs e)
+        {
+            trackedRightAnkles.Add(e.timestamp, e);
+        }
+
+        private void RightFootTracked(object sender, KinectJointTrackedArgs e)
+        {
+            trackedRightFeet.Add(e.timestamp, e);
+            CheckForStamp(ref trackedRightKnees, ref trackedRightAnkles, ref trackedRightFeet, e.timestamp);
         }
     }
 }
