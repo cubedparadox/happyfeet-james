@@ -26,85 +26,138 @@ namespace Happyfeet
             controller.LeftFootTracked += LeftFootTracked;
         }
 
-        private void CheckForStamp(long currentTimestamp)
+        private void CheckForStamp(ref Dictionary<long, KinectJointTrackedArgs> trackedKnees, ref Dictionary<long, KinectJointTrackedArgs> trackedAnkles, ref Dictionary<long, KinectJointTrackedArgs> trackedFeet, long currentTimestamp)
         {
-            float minKneeDepth = float.MaxValue;
-            float maxKneeDepth = float.MinValue;
-            float minAnkleHeight = float.MaxValue;
-            float maxAnkleHeight = float.MinValue;
-            float minFootHeight = float.MaxValue;
-            float maxFootHeight = float.MinValue;
+            trackedKnees = RemoveOldTracks(trackedKnees, currentTimestamp);
+            trackedAnkles = RemoveOldTracks(trackedAnkles, currentTimestamp);
+            trackedFeet = RemoveOldTracks(trackedFeet, currentTimestamp);
 
-            Dictionary<long, KinectJointTrackedArgs> leftKnees = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftKnees);
-            foreach (KeyValuePair<long, KinectJointTrackedArgs> trackInfo in leftKnees)
+            try
             {
-                if ((currentTimestamp - trackInfo.Key) > bufferTime)
-                    trackedLeftKnees.Remove(trackInfo.Key);
-                else
-                {
-                    if (trackInfo.Value.position.Z < minKneeDepth)
-                        minKneeDepth = trackInfo.Value.position.Z;
-                    if (trackInfo.Value.position.Z > maxKneeDepth)
-                        maxKneeDepth = trackInfo.Value.position.Z;
-                }
-            }
+                KinectJointTrackedArgs minKneeDepth = FindMinDepth(trackedKnees);
+                KinectJointTrackedArgs maxKneeDepthBefore = FindMaxDepthBefore(trackedKnees, minKneeDepth.timestamp);
+                KinectJointTrackedArgs maxKneeDepthAfter = FindMaxDepthAfter(trackedKnees, minKneeDepth.timestamp);
 
-            Dictionary<long, KinectJointTrackedArgs> leftAnkles = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftAnkles);
-            foreach (KeyValuePair<long, KinectJointTrackedArgs> trackInfo in leftAnkles)
-            {
-                if ((currentTimestamp - trackInfo.Key) > bufferTime)
-                    trackedLeftAnkles.Remove(trackInfo.Key);
-                else
-                {
-                    if (trackInfo.Value.position.Y < minAnkleHeight)
-                        minAnkleHeight = trackInfo.Value.position.Y;
-                    if (trackInfo.Value.position.Y > maxAnkleHeight)
-                        maxAnkleHeight = trackInfo.Value.position.Y;
-                }
-            }
+                KinectJointTrackedArgs maxAnkleHeight = FindMaxHeight(trackedAnkles);
+                KinectJointTrackedArgs minAnkleHeightBefore = FindMinHeightBefore(trackedAnkles, maxAnkleHeight.timestamp);
+                KinectJointTrackedArgs minAnkleHeihgtAfter = FindMinHeightAfter(trackedAnkles, maxAnkleHeight.timestamp);
 
-            Dictionary<long, KinectJointTrackedArgs> leftFeet = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftFeet);
-            foreach (KeyValuePair<long, KinectJointTrackedArgs> trackInfo in leftFeet)
-            {
-                if ((currentTimestamp - trackInfo.Key) > bufferTime)
-                    trackedLeftFeet.Remove(trackInfo.Key);
-                else
-                {
-                    if (trackInfo.Value.position.Y < minFootHeight)
-                        minFootHeight = trackInfo.Value.position.Y;
-                    if (trackInfo.Value.position.Y > maxFootHeight)
-                        maxFootHeight = trackInfo.Value.position.Y;
-                }
-            }
+                KinectJointTrackedArgs maxFootHeight = FindMaxHeight(trackedFeet);
+                KinectJointTrackedArgs minFootHeightBefore = FindMinHeightBefore(trackedFeet, maxFootHeight.timestamp);
+                KinectJointTrackedArgs minFootHeightAfter = FindMinHeightAfter(trackedFeet, maxFootHeight.timestamp);
 
-            if ((minKneeDepth != float.MaxValue) && (maxKneeDepth != float.MinValue) && (minAnkleHeight != float.MaxValue) && (maxAnkleHeight != float.MinValue) && (minFootHeight != float.MaxValue) && (maxFootHeight != float.MinValue))
-            {
-                if (((maxKneeDepth - minKneeDepth) > minKneeDepthChange) && ((maxAnkleHeight - minAnkleHeight) > minFootHeightChange) && ((maxFootHeight - minFootHeight) > minFootHeightChange))
+                bool kneeCorrect = (((maxKneeDepthBefore.position.Z - minKneeDepth.position.Z) >= minKneeDepthChange) && ((maxKneeDepthAfter.position.Z - minKneeDepth.position.Z) >= minKneeDepthChange));
+                bool ankleCorrect = (((maxAnkleHeight.position.Y - minAnkleHeightBefore.position.Y) >= minFootHeightChange) && ((maxAnkleHeight.position.Y - minAnkleHeihgtAfter.position.Y) >= minFootHeightChange));
+                bool footCorrect = (((maxFootHeight.position.Y - minFootHeightBefore.position.Y) >= minFootHeightChange) && ((maxFootHeight.position.Y - minFootHeightAfter.position.Y) >= minFootHeightChange));
+
+                if (kneeCorrect && ankleCorrect && footCorrect)
                 {
                     // Stamp detected
-                    trackedLeftKnees.Clear();
-                    trackedLeftAnkles.Clear();
-                    trackedLeftFeet.Clear();
+                    trackedKnees.Clear();
+                    trackedAnkles.Clear();
+                    trackedFeet.Clear();
                 }
             }
+            catch (NullReferenceException ex)
+            {
+            }
+        }
+
+        private Dictionary<long, KinectJointTrackedArgs> RemoveOldTracks(Dictionary<long, KinectJointTrackedArgs> tracks, long currentTimestamp)
+        {
+            Dictionary<long, KinectJointTrackedArgs> tempTracks = new Dictionary<long, KinectJointTrackedArgs>();
+            foreach (KeyValuePair<long, KinectJointTrackedArgs> track in tracks)
+            {
+                if ((currentTimestamp - track.Key) <= bufferTime)
+                    tempTracks.Add(track.Key, track.Value);
+            }
+            return tempTracks;
+        }
+
+        private KinectJointTrackedArgs FindMinDepth(Dictionary<long, KinectJointTrackedArgs> tracks)
+        {
+            KinectJointTrackedArgs minDepth = null;
+            foreach (KinectJointTrackedArgs track in tracks.Values)
+            {
+                if ((minDepth == null) || (track.position.Z < minDepth.position.Z))
+                    minDepth = track;
+            }
+            return minDepth;
+        }
+
+        private KinectJointTrackedArgs FindMaxDepthBefore(Dictionary<long, KinectJointTrackedArgs> tracks, long timestamp)
+        {
+            KinectJointTrackedArgs maxDepth = null;
+            foreach (KeyValuePair<long, KinectJointTrackedArgs> track in tracks)
+            {
+                if (track.Key < timestamp)
+                    if ((maxDepth == null) || (track.Value.position.Z > maxDepth.position.Z))
+                        maxDepth = track.Value;
+            }
+            return maxDepth;
+        }
+
+        private KinectJointTrackedArgs FindMaxDepthAfter(Dictionary<long, KinectJointTrackedArgs> tracks, long timestamp)
+        {
+            KinectJointTrackedArgs maxDepth = null;
+            foreach (KeyValuePair<long, KinectJointTrackedArgs> track in tracks)
+            {
+                if (track.Key > timestamp)
+                    if ((maxDepth == null) || (track.Value.position.Z > maxDepth.position.Z))
+                        maxDepth = track.Value;
+            }
+            return maxDepth;
+        }
+
+        private KinectJointTrackedArgs FindMaxHeight(Dictionary<long, KinectJointTrackedArgs> tracks)
+        {
+            KinectJointTrackedArgs maxHeight = null;
+            foreach (KinectJointTrackedArgs track in tracks.Values)
+            {
+                if ((maxHeight == null) || (track.position.Y > maxHeight.position.Y))
+                    maxHeight = track;
+            }
+            return maxHeight;
+        }
+
+        private KinectJointTrackedArgs FindMinHeightBefore(Dictionary<long, KinectJointTrackedArgs> tracks, long timestamp)
+        {
+            KinectJointTrackedArgs minHeight = null;
+            foreach (KeyValuePair<long, KinectJointTrackedArgs> track in tracks)
+            {
+                if (track.Key < timestamp)
+                    if ((minHeight == null) || (track.Value.position.Y < minHeight.position.Y))
+                        minHeight = track.Value;
+            }
+            return minHeight;
+        }
+
+        private KinectJointTrackedArgs FindMinHeightAfter(Dictionary<long, KinectJointTrackedArgs> tracks, long timestamp)
+        {
+            KinectJointTrackedArgs minHeight = null;
+            foreach (KeyValuePair<long, KinectJointTrackedArgs> track in tracks)
+            {
+                if (track.Key > timestamp)
+                    if ((minHeight == null) || (track.Value.position.Y < minHeight.position.Y))
+                        minHeight = track.Value;
+            }
+            return minHeight;
         }
 
         private void LeftKneeTracked(object sender, KinectJointTrackedArgs e)
         {
             trackedLeftKnees.Add(e.timestamp, e);
-            CheckForStamp(e.timestamp);
         }
 
         private void LeftAnkleTracked(object sender, KinectJointTrackedArgs e)
         {
             trackedLeftAnkles.Add(e.timestamp, e);
-            CheckForStamp(e.timestamp);
         }
 
         private void LeftFootTracked(object sender, KinectJointTrackedArgs e)
         {
             trackedLeftFeet.Add(e.timestamp, e);
-            CheckForStamp(e.timestamp);
+            CheckForStamp(ref trackedLeftKnees, ref trackedLeftAnkles, ref trackedLeftFeet, e.timestamp);
         }
     }
 }
