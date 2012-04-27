@@ -147,6 +147,10 @@ namespace Happyfeet
 
         public void KinectStop()
         {
+            foreach (KinectSensor sensor in KinectSensor.KinectSensors)
+            {
+                sensor.Stop();
+            }
             KinectSensor.KinectSensors.StatusChanged -= this.StatusChanged;
         }
 
@@ -268,17 +272,19 @@ namespace Happyfeet
                 try
                 {
                     sensor.Start();
+                    OnStreamEnabled(new KinectStatusArgs(sensor.DeviceConnectionId));
                 }
                 catch (IOException)
                 {
-
                 }
-                OnStreamEnabled(new KinectStatusArgs(sensor.DeviceConnectionId));
             }
             else
             {
-                OnStreamDisabled(new KinectStatusArgs(sensor.DeviceConnectionId));
-                sensor.Stop();
+                if (sensor.IsRunning)
+                {
+                    OnStreamDisabled(new KinectStatusArgs(sensor.DeviceConnectionId));
+                    sensor.Stop();
+                }
             }
         }
     }

@@ -1,8 +1,16 @@
 ﻿<Window x:Class="Happyfeet.StatusWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="StatusWindow" Height="500" Width="800" Loaded="WindowLoaded">
+        Title="StatusWindow" Height="768" Width="1024" Loaded="WindowLoaded">
     <Grid>
-        <TextBox Height="437" HorizontalAlignment="Left" Margin="12,12,0,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="747" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectStatusBox_TextChanged" />
+        <TextBox Height="90 " HorizontalAlignment="Center" Margin="0,12,0,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="978" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectStatusBox_TextChanged" Background="White" />
+        <TextBox Height="90" HorizontalAlignment="Center" Margin="0,108,0,0" Name="kinectSkeletonBox" VerticalAlignment="Top" Width="978" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectSkeletonBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Center" Margin="0,204,0,0" Name="kinectSpineBox" VerticalAlignment="Top" Width="600" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectSpineBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Left" Margin="12,300,0,0" Name="kinectLeftKneeBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectLeftKneeBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Right" Margin="0,300,12,0" Name="kinectRightKneeBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectRightKneeBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Left" Margin="12,396,0,0" Name="kinectLeftAnkleBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectLeftAnkleBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Right" Margin="0,396,12,0" Name="kinectRightAnkleBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectRightAnkleBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Left" Margin="12,492,0,0" Name="kinectLeftFootBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectLeftFootBox_TextChanged" />
+        <TextBox Height="90" HorizontalAlignment="Right" Margin="0,492,12,0" Name="kinectRightFootBox" VerticalAlignment="Top" Width="450" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectRightFootBox_TextChanged" />
     </Grid>
 </Window>
