@@ -20,6 +20,7 @@ namespace Happyfeet
     public partial class StatusWindow : Window
     {
         private KinectController kinectController;
+        private KinectGestureRecognizer kinectGestureRecognizer;
         private List<int> reportedSkeletons;
 
         public StatusWindow()
@@ -48,6 +49,8 @@ namespace Happyfeet
             kinectController.LeftKneeTracked += this.KinectLeftKneeTracked;
             kinectController.RightKneeTracked += this.KinectRightKneeTracked;
             kinectController.SpineTracked += this.KinectSpineTracked;
+
+            kinectGestureRecognizer = new KinectGestureRecognizer(kinectController);
 
             kinectController.KinectStart();
         }
