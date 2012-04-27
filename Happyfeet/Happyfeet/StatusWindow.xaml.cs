@@ -20,6 +20,7 @@ namespace Happyfeet
     public partial class StatusWindow : Window
     {
         private KinectController kinectController;
+        private List<int> reportedSkeletons;
 
         public StatusWindow()
         {
@@ -28,6 +29,8 @@ namespace Happyfeet
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            reportedSkeletons = new List<int>();
+
             kinectController = new KinectController();
 
             kinectController.Initializing += this.KinectInitializing;
@@ -86,42 +89,46 @@ namespace Happyfeet
 
         private void KinectSkeletonTracked(object sender, KinectSkeletonTrackedArgs e)
         {
-            this.kinectSkeletonBox.Text += "Skeleton " + e.skeleton.TrackingId + ": (" + e.skeleton.Position.X + "," + e.skeleton.Position.Y + "," + e.skeleton.Position.Z + ")\n";
+            if (!reportedSkeletons.Contains(e.skeleton.TrackingId))
+            {
+                reportedSkeletons.Add(e.skeleton.TrackingId);
+                this.kinectSkeletonBox.Text += "Skeleton " + e.skeleton.TrackingId + "\n";
+            }
         }
 
         private void KinectLeftFootTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectLeftFootBox.Text += "Left foot: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectLeftFootBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectRightFootTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectRightFootBox.Text += "Right foot: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectRightFootBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectLeftAnkleTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectLeftAnkleBox.Text += "Left ankle: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectLeftAnkleBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectRightAnkleTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectRightAnkleBox.Text += "Right ankle: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectRightAnkleBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectLeftKneeTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectLeftKneeBox.Text += "Left knee: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectLeftKneeBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectRightKneeTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectRightKneeBox.Text += "Right knee: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectRightKneeBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void KinectSpineTracked(object sender, KinectJointTrackedArgs e)
         {
-            this.kinectSpineBox.Text += "Spine: (" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")\n";
+            this.kinectSpineBox.Content = "(" + e.position.X + "," + e.position.Y + "," + e.position.Z + ")";
         }
 
         private void kinectStatusBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -132,41 +139,6 @@ namespace Happyfeet
         private void kinectSkeletonBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             kinectSkeletonBox.ScrollToEnd();
-        }
-
-        private void kinectSpineBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectSpineBox.ScrollToEnd();
-        }
-
-        private void kinectLeftKneeBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectLeftKneeBox.ScrollToEnd();
-        }
-
-        private void kinectRightKneeBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectRightKneeBox.ScrollToEnd();
-        }
-
-        private void kinectLeftAnkleBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectLeftAnkleBox.ScrollToEnd();
-        }
-
-        private void kinectRightAnkleBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectRightAnkleBox.ScrollToEnd();
-        }
-
-        private void kinectLeftFootBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectLeftFootBox.ScrollToEnd();
-        }
-
-        private void kinectRightFootBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            kinectRightFootBox.ScrollToEnd();
         }
     }
 }
