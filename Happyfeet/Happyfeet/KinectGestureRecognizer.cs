@@ -11,6 +11,7 @@ namespace Happyfeet
         private const int bufferTime = 1000;
         private const float minKneeDepthChange = 0.1f;
         private const float minFootHeightChange = 0.15f;
+        private const float maxFootDepthChange = 0.15f;
 
         private Dictionary<long, KinectJointTrackedArgs> trackedLeftKnees;
         private Dictionary<long, KinectJointTrackedArgs> trackedLeftAnkles;
@@ -76,7 +77,7 @@ namespace Happyfeet
 
                 bool kneeCorrect = (((maxKneeDepthBefore.position.Z - minKneeDepth.position.Z) >= minKneeDepthChange) && ((maxKneeDepthAfter.position.Z - minKneeDepth.position.Z) >= minKneeDepthChange));
                 bool ankleCorrect = (((maxAnkleHeight.position.Y - minAnkleHeightBefore.position.Y) >= minFootHeightChange) && ((maxAnkleHeight.position.Y - minAnkleHeihgtAfter.position.Y) >= minFootHeightChange));
-                bool footCorrect = (((maxFootHeight.position.Y - minFootHeightBefore.position.Y) >= minFootHeightChange) && ((maxFootHeight.position.Y - minFootHeightAfter.position.Y) >= minFootHeightChange));
+                bool footCorrect = (((maxFootHeight.position.Y - minFootHeightBefore.position.Y) >= minFootHeightChange) && ((maxFootHeight.position.Y - minFootHeightAfter.position.Y) >= minFootHeightChange) && (Math.Abs(maxFootHeight.position.Z - minFootHeightBefore.position.Z) <= maxFootDepthChange) && (Math.Abs(maxFootHeight.position.Z - minFootHeightAfter.position.Z) <= maxFootDepthChange));
 
                 if (kneeCorrect && ankleCorrect && footCorrect)
                 {
