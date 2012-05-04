@@ -1,10 +1,10 @@
 ﻿<Window x:Class="Happyfeet.StatusWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="StatusWindow" Height="768" Width="1024" Loaded="WindowLoaded">
+        Title="StatusWindow" Height="650" Width="800" Loaded="WindowLoaded">
     <Grid>
-        <TextBox Height="90 " HorizontalAlignment="Center" Margin="0,12,0,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="978" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectStatusBox_TextChanged" Background="White" />
-        <TextBox Height="90" HorizontalAlignment="Center" Margin="0,108,0,0" Name="kinectSkeletonBox" VerticalAlignment="Top" Width="978" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectSkeletonBox_TextChanged" />
+        <TextBox Height="90 " HorizontalAlignment="Center" Margin="12,12,12,0" Name="kinectStatusBox" VerticalAlignment="Top" Width="754" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectStatusBox_TextChanged" Background="White" />
+        <TextBox Height="90" HorizontalAlignment="Center" Margin="12,108,12,0" Name="kinectSkeletonBox" VerticalAlignment="Top" Width="754" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" TextChanged="kinectSkeletonBox_TextChanged" />
         <Label Content="Spine" HorizontalAlignment="Center" Margin="0,204,0,0" Name="label1" VerticalAlignment="Top" FontWeight="Bold" FontSize="22"/>
         <Label HorizontalAlignment="Center" Margin="0,249,0,0" Name="kinectSpineBox" VerticalAlignment="Top" FontSize="22"/>
         <Label Content="Left Knee" HorizontalAlignment="Left" Margin="12,294,0,0" Name="label2" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" />
@@ -18,7 +18,7 @@
         <Label Content="Left Foot" HorizontalAlignment="Left" Margin="12,474,0,0" Name="label6" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" />
         <Label HorizontalAlignment="Left" Margin="12,519,0,0" Name="kinectLeftFootBox" VerticalAlignment="Top" FontSize="22" />
         <Label Content="Right Foot" HorizontalAlignment="Right" Margin="0,474,12,0" Name="label7" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" />
-        <Label Content="lol"  HorizontalAlignment="Right" Margin="0,519,12,0" Name="kinectRightFootBox" VerticalAlignment="Top" FontSize="22" />
+        <Label HorizontalAlignment="Right" Margin="0,519,12,0" Name="kinectRightFootBox" VerticalAlignment="Top" FontSize="22" />
         <Label Content="Label" HorizontalAlignment="Center" Margin="0,564,0,0" Name="kinectStampLabel" VerticalAlignment="Top" FontWeight="Bold" FontSize="22" Visibility="Hidden" />
     </Grid>
 </Window>

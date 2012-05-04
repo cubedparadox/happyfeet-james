@@ -26,6 +26,7 @@ namespace Happyfeet
         private KinectGestureRecognizer kinectGestureRecognizer;
         private List<int> reportedSkeletons;
         private DispatcherTimer stampLabelTimer;
+        private MainWindow mainWindow;
 
         public StatusWindow()
         {
@@ -34,6 +35,8 @@ namespace Happyfeet
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            mainWindow = new MainWindow();
+
             reportedSkeletons = new List<int>();
 
             stampLabelTimer = new DispatcherTimer();
@@ -72,21 +75,26 @@ namespace Happyfeet
 
         private void KinectNotPowered(object sender, KinectStatusArgs e)
         {
+            mainWindow.Close();
             this.kinectStatusBox.Text += "Connect Kinect " + e.kinectID + " to a power source...\n";
         }
 
         private void KinectError(object sender, KinectErrorArgs e)
         {
+            mainWindow.Close();
             this.kinectStatusBox.Text += "Kinect " + e.kinectID + " error: " + e.status + "\n";
         }
 
         private void KinectReady(object sender, KinectStatusArgs e)
         {
             this.kinectStatusBox.Text += "Kinect " + e.kinectID + " is ready!\n";
+            mainWindow = new MainWindow();
+            mainWindow.Show();
         }
 
         private void KinectDisconnected(object sender, KinectStatusArgs e)
         {
+            mainWindow.Close();
             this.kinectStatusBox.Text += "Kinect " + e.kinectID + " has been disconnected...\n";
         }
 
