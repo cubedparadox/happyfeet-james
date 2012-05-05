@@ -19,10 +19,9 @@ namespace Happyfeet
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static int numItems = 8;
         private static int numColumns = 4;
 
-        private Label[] menuItems;
+        private ItemSelector itemSelector;
 
         public MainWindow()
         {
@@ -31,7 +30,7 @@ namespace Happyfeet
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            menuItems = new Label[numItems];
+            Label[] menuItems = new Label[ItemSelector.numItems];
 
             for (int i = 0; i < menuItems.Length; i++)
             {
@@ -53,6 +52,9 @@ namespace Happyfeet
                 Grid.SetRow(item, i / numColumns);
                 menuGrid.Children.Add(item);
             }
+
+            itemSelector = new ItemSelector(menuItems, calibrationLabel);
+            itemSelector.Calibrate();
         }
     }
 }

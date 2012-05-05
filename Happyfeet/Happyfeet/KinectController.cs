@@ -7,7 +7,7 @@ using Microsoft.Kinect;
 
 namespace Happyfeet
 {
-    class KinectController
+    public class KinectController
     {
         private Dictionary<string, KinectSensor> kinectSensors;
         private Skeleton[] skeletonData;

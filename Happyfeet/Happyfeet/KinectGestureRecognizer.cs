@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
 
 namespace Happyfeet
 {
-    class KinectGestureRecognizer
+    public class KinectGestureRecognizer
     {
         private const int bufferTime = 1000;
         private const float minKneeDepthChange = 0.1f;
@@ -22,6 +23,9 @@ namespace Happyfeet
         private Dictionary<long, KinectJointTrackedArgs> trackedRightFeet;
 
         private Dictionary<long, KinectJointTrackedArgs> trackedSpines;
+
+        private BackgroundWorker leftStampRecognizer;
+        private BackgroundWorker rightStampRecognizer;
 
         public event KinectStampDetectedHandler StampDetected;
 
@@ -43,6 +47,15 @@ namespace Happyfeet
 
             trackedSpines = new Dictionary<long, KinectJointTrackedArgs>();
 
+            leftStampRecognizer = new BackgroundWorker();
+            rightStampRecognizer = new BackgroundWorker();
+
+            leftStampRecognizer.DoWork += new DoWorkEventHandler(leftStampRecognizer_DoWork);
+            rightStampRecognizer.DoWork += new DoWorkEventHandler(rightStampRecognizer_DoWork);
+
+            leftStampRecognizer.RunWorkerCompleted += new RunWorkerCompletedEventHandler(leftStampRecognizer_RunWorkerCompleted);
+            rightStampRecognizer.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rightStampRecognizer_RunWorkerCompleted);
+
             controller.LeftKneeTracked += LeftKneeTracked;
             controller.LeftAnkleTracked += LeftAnkleTracked;
             controller.LeftFootTracked += LeftFootTracked;
@@ -54,13 +67,84 @@ namespace Happyfeet
             controller.SpineTracked += SpineTracked;
         }
 
-        private void CheckForStamp(ref Dictionary<long, KinectJointTrackedArgs> trackedKnees, ref Dictionary<long, KinectJointTrackedArgs> trackedAnkles, ref Dictionary<long, KinectJointTrackedArgs> trackedFeet, long currentTimestamp)
+        void rightStampRecognizer_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            trackedKnees = RemoveOldTracks(trackedKnees, currentTimestamp);
-            trackedAnkles = RemoveOldTracks(trackedAnkles, currentTimestamp);
-            trackedFeet = RemoveOldTracks(trackedFeet, currentTimestamp);
-            trackedSpines = RemoveOldTracks(trackedSpines, currentTimestamp);
+            if (e.Result != null)
+            {
+                trackedRightKnees.Clear();
+                trackedRightAnkles.Clear();
+                trackedRightFeet.Clear();
+                KinectStampDetectedArgs eventArgs = (KinectStampDetectedArgs) e.Result;
+                OnStampDetected(eventArgs);
+            }
+        }
 
+        void leftStampRecognizer_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Result != null)
+            {
+                trackedLeftKnees.Clear();
+                trackedLeftAnkles.Clear();
+                trackedLeftFeet.Clear();
+                KinectStampDetectedArgs eventArgs = (KinectStampDetectedArgs) e.Result;
+                OnStampDetected(eventArgs);
+            }
+        }
+
+        void rightStampRecognizer_DoWork(object sender, DoWorkEventArgs e)
+        {
+            TrackingData trackingData = (TrackingData) e.Argument;
+
+            if (CheckForStamp(trackingData.trackedKnees, trackingData.trackedAnkles, trackingData.trackedFeet))
+            {
+                SkeletonPoint position = trackingData.trackedSpines[trackingData.trackedSpines.Keys.Max()].position;
+                e.Result = new KinectStampDetectedArgs(position, trackingData.currentTimestamp);
+            }
+        }
+
+        void leftStampRecognizer_DoWork(object sender, DoWorkEventArgs e)
+        {
+            TrackingData trackingData = (TrackingData) e.Argument;
+
+            if (CheckForStamp(trackingData.trackedKnees, trackingData.trackedAnkles, trackingData.trackedFeet))
+            {
+                SkeletonPoint poisition = trackingData.trackedSpines[trackingData.trackedSpines.Keys.Max()].position;
+                e.Result = new KinectStampDetectedArgs(poisition, trackingData.currentTimestamp);
+            }
+        }
+
+        private void CheckForLeftStamp(long currentTimestamp)
+        {
+            if (!leftStampRecognizer.IsBusy)
+            {
+                TrackingData data = new TrackingData();
+                data.trackedKnees = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftKnees);
+                data.trackedAnkles = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftAnkles);
+                data.trackedFeet = new Dictionary<long, KinectJointTrackedArgs>(trackedLeftFeet);
+                data.trackedSpines = new Dictionary<long, KinectJointTrackedArgs>(trackedSpines);
+                data.currentTimestamp = currentTimestamp;
+
+                leftStampRecognizer.RunWorkerAsync(data);
+            }
+        }
+
+        private void CheckForRightStamp(long currentTimestamp)
+        {
+            if (!rightStampRecognizer.IsBusy)
+            {
+                TrackingData data = new TrackingData();
+                data.trackedKnees = new Dictionary<long, KinectJointTrackedArgs>(trackedRightKnees);
+                data.trackedAnkles = new Dictionary<long, KinectJointTrackedArgs>(trackedRightAnkles);
+                data.trackedFeet = new Dictionary<long, KinectJointTrackedArgs>(trackedRightFeet);
+                data.trackedSpines = new Dictionary<long, KinectJointTrackedArgs>(trackedSpines);
+                data.currentTimestamp = currentTimestamp;
+
+                rightStampRecognizer.RunWorkerAsync(data);
+            }
+        }
+
+        private Boolean CheckForStamp(Dictionary<long, KinectJointTrackedArgs> trackedKnees, Dictionary<long, KinectJointTrackedArgs> trackedAnkles, Dictionary<long, KinectJointTrackedArgs> trackedFeet)
+        {
             try
             {
                 KinectJointTrackedArgs minKneeDepth = FindMinDepth(trackedKnees);
@@ -82,16 +166,14 @@ namespace Happyfeet
                 if (kneeCorrect && ankleCorrect && footCorrect)
                 {
                     // Stamp detected
-                    SkeletonPoint position = trackedSpines[trackedSpines.Keys.Max()].position;
-                    OnStampDetected(new KinectStampDetectedArgs(position, currentTimestamp));
-
-                    trackedKnees.Clear();
-                    trackedAnkles.Clear();
-                    trackedFeet.Clear();
+                    return true;
                 }
+                else
+                    return false;
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
+                return false;
             }
         }
 
@@ -178,39 +260,102 @@ namespace Happyfeet
 
         private void LeftKneeTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedLeftKnees.Add(e.timestamp, e);
+            try
+            {
+                trackedLeftKnees.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedLeftKnees.Remove(e.timestamp);
+                trackedLeftKnees.Add(e.timestamp, e);
+            }
+            trackedLeftKnees = RemoveOldTracks(trackedLeftKnees, e.timestamp);
         }
 
         private void LeftAnkleTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedLeftAnkles.Add(e.timestamp, e);
+            try
+            {
+                trackedLeftAnkles.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedLeftAnkles.Remove(e.timestamp);
+                trackedLeftAnkles.Add(e.timestamp, e);
+            }
+            trackedLeftAnkles = RemoveOldTracks(trackedLeftAnkles, e.timestamp);
         }
 
         private void LeftFootTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedLeftFeet.Add(e.timestamp, e);
-            CheckForStamp(ref trackedLeftKnees, ref trackedLeftAnkles, ref trackedLeftFeet, e.timestamp);
+            try
+            {
+                trackedLeftFeet.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedLeftFeet.Remove(e.timestamp);
+                trackedLeftFeet.Add(e.timestamp, e);
+            }
+            trackedLeftFeet = RemoveOldTracks(trackedLeftFeet, e.timestamp);
+            CheckForLeftStamp(e.timestamp);
         }
 
         private void RightKneeTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedRightKnees.Add(e.timestamp, e);
+            try
+            {
+                trackedRightKnees.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedRightKnees.Remove(e.timestamp);
+                trackedRightKnees.Add(e.timestamp, e);
+            }
+            trackedRightKnees = RemoveOldTracks(trackedRightKnees, e.timestamp);
         }
 
         private void RightAnkleTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedRightAnkles.Add(e.timestamp, e);
+            try
+            {
+                trackedRightAnkles.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedRightAnkles.Remove(e.timestamp);
+                trackedRightAnkles.Add(e.timestamp, e);
+            }
+            trackedRightAnkles = RemoveOldTracks(trackedRightAnkles, e.timestamp);
         }
 
         private void RightFootTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedRightFeet.Add(e.timestamp, e);
-            CheckForStamp(ref trackedRightKnees, ref trackedRightAnkles, ref trackedRightFeet, e.timestamp);
+            try
+            {
+                trackedRightFeet.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedRightFeet.Remove(e.timestamp);
+                trackedRightFeet.Add(e.timestamp, e);
+            }
+            trackedRightFeet = RemoveOldTracks(trackedRightFeet, e.timestamp);
+            CheckForRightStamp(e.timestamp);
         }
 
         private void SpineTracked(object sender, KinectJointTrackedArgs e)
         {
-            trackedSpines.Add(e.timestamp, e);
+            try
+            {
+                trackedSpines.Add(e.timestamp, e);
+            }
+            catch (ArgumentException)
+            {
+                trackedSpines.Remove(e.timestamp);
+                trackedSpines.Add(e.timestamp, e);
+            }
+            trackedSpines = RemoveOldTracks(trackedSpines, e.timestamp);
         }
     }
 
@@ -226,5 +371,14 @@ namespace Happyfeet
         
         public SkeletonPoint position;
         public long timestamp;
+    }
+
+    public class TrackingData
+    {
+        public Dictionary<long, KinectJointTrackedArgs> trackedKnees;
+        public Dictionary<long, KinectJointTrackedArgs> trackedAnkles;
+        public Dictionary<long, KinectJointTrackedArgs> trackedFeet;
+        public Dictionary<long, KinectJointTrackedArgs> trackedSpines;
+        public long currentTimestamp;
     }
 }

@@ -22,8 +22,6 @@ namespace Happyfeet
     {
         private const Int32 stampLabelTimeout = 3000;
 
-        private KinectController kinectController;
-        private KinectGestureRecognizer kinectGestureRecognizer;
         private List<int> reportedSkeletons;
         private DispatcherTimer stampLabelTimer;
         private MainWindow mainWindow;
@@ -35,6 +33,8 @@ namespace Happyfeet
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            KinectAccessor.Initialize();
+
             mainWindow = new MainWindow();
 
             reportedSkeletons = new List<int>();
@@ -43,29 +43,25 @@ namespace Happyfeet
             stampLabelTimer.Interval = new TimeSpan(0, 0, 0, 0, stampLabelTimeout);
             stampLabelTimer.Tick += ClearStampLabel;
 
-            kinectController = new KinectController();
+            KinectAccessor.controller.Initializing += this.KinectInitializing;
+            KinectAccessor.controller.NotPowered += this.KinectNotPowered;
+            KinectAccessor.controller.Error += this.KinectError;
+            KinectAccessor.controller.Ready += this.KinectReady;
+            KinectAccessor.controller.Disconnected += this.KinectDisconnected;
+            KinectAccessor.controller.StreamEnabled += this.KinectStreamEnabled;
+            KinectAccessor.controller.StreamDisabled += this.KinectStreamDisabled;
+            KinectAccessor.controller.SkeletonTracked += this.KinectSkeletonTracked;
+            KinectAccessor.controller.LeftFootTracked += this.KinectLeftFootTracked;
+            KinectAccessor.controller.LeftAnkleTracked += this.KinectLeftAnkleTracked;
+            KinectAccessor.controller.RightFootTracked += this.KinectRightFootTracked;
+            KinectAccessor.controller.RightAnkleTracked += this.KinectRightAnkleTracked;
+            KinectAccessor.controller.LeftKneeTracked += this.KinectLeftKneeTracked;
+            KinectAccessor.controller.RightKneeTracked += this.KinectRightKneeTracked;
+            KinectAccessor.controller.SpineTracked += this.KinectSpineTracked;
 
-            kinectController.Initializing += this.KinectInitializing;
-            kinectController.NotPowered += this.KinectNotPowered;
-            kinectController.Error += this.KinectError;
-            kinectController.Ready += this.KinectReady;
-            kinectController.Disconnected += this.KinectDisconnected;
-            kinectController.StreamEnabled += this.KinectStreamEnabled;
-            kinectController.StreamDisabled += this.KinectStreamDisabled;
-            kinectController.SkeletonTracked += this.KinectSkeletonTracked;
-            kinectController.LeftFootTracked += this.KinectLeftFootTracked;
-            kinectController.LeftAnkleTracked += this.KinectLeftAnkleTracked;
-            kinectController.RightFootTracked += this.KinectRightFootTracked;
-            kinectController.RightAnkleTracked += this.KinectRightAnkleTracked;
-            kinectController.LeftKneeTracked += this.KinectLeftKneeTracked;
-            kinectController.RightKneeTracked += this.KinectRightKneeTracked;
-            kinectController.SpineTracked += this.KinectSpineTracked;
+            KinectAccessor.gestureRecognizer.StampDetected += this.StampDetected;
 
-            kinectGestureRecognizer = new KinectGestureRecognizer(kinectController);
-
-            kinectGestureRecognizer.StampDetected += this.StampDetected;
-
-            kinectController.KinectStart();
+            KinectAccessor.controller.KinectStart();
         }
 
         private void KinectInitializing(object sender, KinectStatusArgs e)
