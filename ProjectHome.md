@@ -1,0 +1,1 @@
+Projects a menu on the floor with a number of possible selections. The user can then select items by stamping on them.
